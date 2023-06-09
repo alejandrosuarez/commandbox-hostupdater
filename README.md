@@ -14,9 +14,7 @@ CommandBox> install commandbox-hostupdater
 
 To uninstall the module, switch to the installation folder in Commandbox and run the uninstall command:
 ```bash
-CommandBox> #expandPath /commandbox | cd
-CommandBox> list
-CommandBox> uninstall commandbox-hostupdater
+CommandBox> uninstall commandbox-hostupdater --system
 ```
 
 ### Usage
