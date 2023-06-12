@@ -18,7 +18,7 @@ CommandBox> uninstall commandbox-hostupdater --system
 ```
 
 ### Usage
-&ast;nix users do *not* need to start CommandBox with `sudo` any more! The downside here is that 
+&ast;nix users do *not* need to start CommandBox with `sudo` any more! The downside here is that
 *However*, please note that on &ast;nix you can only bind ports >= 1024, if you're not root.
 That means if you want to use port 80, you still have to start CommandBox with `sudo`, sorry!
 (CommandBox will incorrectly assume that port 80 is taken if you try to start a server on port 80 without being root.)
@@ -63,7 +63,20 @@ CommandBox> server set web.hostAlias=www.project.local
 }
 ```
 
-*Please note:* If you specify host aliases when starting the server, these aliases will be added to server.json, but *not* in the web section. (That would have required a modification of the core CommandBox files.) In order to keep the flexibility, hostAliases will be recognized both inside and outside of the `web` section. 
+*Please note:* If you specify host aliases when starting the server, these aliases will be added to server.json, but *not* in the web section. (That would have required a modification of the core CommandBox files.) In order to keep the flexibility, hostAliases will be recognized both inside and outside of the `web` section.
+
+### CommandBox 6.0 Bindings
+
+This module supports the new bindings syntax of CommandBox 6 and up.  All host aliases which are NOT wild card matches or regular expressions will be added to the hosts file.  This includes
+* `web.host`
+* `web.hostAlias`
+* `web.bindings.[HTTP/SSL/AJP].host`
+* `sites.[siteName].host`
+* `sites.[siteName].hostAlias`
+* `sites.[siteName].bindings.[HTTP/SSL/AJP].host`
+* `hostAlias` *-- Not used by CommandBox for anything, only used by this module*
+
+Note, if you have configured bindings to specific IP addresses, that will not work well with this module.  The hosts file entries created will always point to localhost, so the bindings will need to be for all IPs.
 
 ### System variables
 
@@ -88,7 +101,7 @@ The module will evaluate the value of the system variable and add that as a host
 
 ### Location of the hosts file
 
-The module assumes the following paths to the hosts file 
+The module assumes the following paths to the hosts file
 
 * **Windows** - `C:\Windows\System32\drivers\etc\hosts`
 * **Linux** - `/etc/hosts`
@@ -98,7 +111,7 @@ The module assumes the following paths to the hosts file
 
 In order to avoid conflicts with other IP addresses you may assign manually, the module only uses IP addresses in the range `127.127.0.1` to `127.127.255.255`.
 
-It detects the highest used IP address in that range and increase that by 1. That gives you 255 x 255 = 65.025 IP addresses to use.  This means each server can use port 80 since you can bind more than one server to the same port so long as it's a different IP.  This gets rid of those random ports for local development.  
+It detects the highest used IP address in that range and increase that by 1. That gives you 255 x 255 = 65.025 IP addresses to use.  This means each server can use port 80 since you can bind more than one server to the same port so long as it's a different IP.  This gets rid of those random ports for local development.
 
 Please note, this will NOT work if you have another web server such as Apache that has been configured to listen to port 80 on all IPs ( `*.80` ).  You can troubleshoot what other processes are listening to ports with the `netstat` command.
 ```bash
