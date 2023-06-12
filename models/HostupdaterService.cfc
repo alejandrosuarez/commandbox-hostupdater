@@ -10,18 +10,17 @@ component accessors="true" singleton {
 	public any function init( any fileSystem inject="FileSystem" ) {
 		variables.fileSystem = arguments.fileSystem;
 		checkHostsFile();
-		
+
 		return this;
 	}
 
 	public void function checkIP ( string server_id, array hostnames=[] ) {
-		
 
 		// check hosts file only if we have a file location and if the provided host name array is not empty
 		if ( variables.hostsFile.len() && arguments.hostnames.len() ) {
-			variables.hostaliases = readHostsFileAsArray( hostsFile ); 
+			variables.hostaliases = readHostsFileAsArray( hostsFile );
 
-			// remove all lines that already contain the server id 
+			// remove all lines that already contain the server id
 			// that way we can make sure that the hosts file doesn't grow indefinitely upon
 			// changing the host name for an existing server
 			removeOldEntriesFromHostsfile( arguments.server_id );
@@ -37,7 +36,7 @@ component accessors="true" singleton {
 				// add the line for the new host entry
 				addNewHostname( "#new_ip#     #hostname# ## CommandBox: Server #arguments.server_id# #dateTimeFormat( now(), 'yyyy-mm-dd HH:nn:ss' )#" );
 			}
-			
+
 			// on Windows only: write to hosts file (on *nix hosts file is modified directly by sed)
 			if( variables.fileSystem.isWindows() )
 				saveHostsFile();
@@ -61,14 +60,14 @@ component accessors="true" singleton {
 	public void function forgetServer( required string server_id ){
 		variables.hostaliases = readHostsFileAsArray( );
 
-		variables.consoleLogger.info( "Removing host(s) for server '#arguments.server_id#' from your hosts file!" ); 
+		variables.consoleLogger.info( "Removing host(s) for server '#arguments.server_id#' from your hosts file!" );
 
-		// remove all lines that contain the server id 
+		// remove all lines that contain the server id
 		removeOldEntriesFromHostsfile( arguments.server_id );
 
 		if( variables.fileSystem.isWindows() )
 			saveHostsFile();
-		
+
 		return;
 	}
 
@@ -86,7 +85,7 @@ component accessors="true" singleton {
 	private void function removeOldEntriesFromHostsfile( required string id_or_hostname ){
 
 		if( !variables.fileSystem.isWindows() ) {
-			local.sedOptArg = variables.fileSystem.isMac() ? " ''" : ""; 
+			local.sedOptArg = variables.fileSystem.isMac() ? " ''" : "";
 			// remove by hostname
 			sudo( "sed -E -i#local.sedOptArg# '/127\.[0-9.]+ +#arguments.id_or_hostname.replace('.', '\.', 'all')# .+/d' #getHostsFileName()#" );
 			// remove by id, if it is very probably an id
@@ -100,18 +99,18 @@ component accessors="true" singleton {
 	}
 
 	private void function removeMatchingLines( required array expressions ){
-		
+
 		if( !isArray( variables.hostaliases ) || !variables.hostaliases.len() )
 			variables.hostaliases = readHostsFileAsArray();
 
 		for( var elem in arguments.expressions ) {
 			variables.hostaliases = variables.hostaliases.filter( function( line ) {
-			 					return !line.listFindNoCase( elem, ' 	' ); 
+			 					return !line.listFindNoCase( elem, ' 	' );
 							  });
 		}
-		
+
 		return;
-	}	
+	}
 
 	private void function addNewHostname( required string entry ){
 
@@ -143,7 +142,7 @@ component accessors="true" singleton {
 			var group_4 = ip_array.filter( function( address ) {
 								return address.listGetAt( 3, '.' ) == group_3;
 						  })
-						  .map( function ( address ) { 
+						  .map( function ( address ) {
 								return address.listLast( '.' );
 						  }).sort( 'numeric', 'desc' )[1];
 
@@ -152,7 +151,7 @@ component accessors="true" singleton {
 
 			var new_ip = '127.127.#group_3#.#group_4#';
 		}
-		else 
+		else
 			var new_ip = '127.127.0.1';
 
 		// MacOS per default only recognizes 127.0.0.1 as local address
@@ -175,7 +174,7 @@ component accessors="true" singleton {
 
 		return;
 	}
-	
+
 	private any function sudo( required string cmdstring ){
 		try {
 			return wb.getinstance( name='CommandDSL', initArguments={ name : 'run sudo sh -c "' & arguments.cmdstring & '"'  } )
