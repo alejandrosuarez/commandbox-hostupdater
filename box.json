@@ -1,6 +1,6 @@
 {
     "name":"CommandBox Host Updater",
-    "version":"1.9.2",
+    "version":"1.10.0",
     "author":"Christoph Schmitz",
     "homepage":"https://github.com/commandbox-modules/commandbox-hostupdater/",
     "documentation":"https://github.com/commandbox-modules/commandbox-hostupdater/README.md",
