@@ -20,12 +20,27 @@ component accessors="true" singleton {
 		if ( variables.hostsFile.len() && arguments.hostnames.len() ) {
 			variables.hostaliases = readHostsFileAsArray( hostsFile );
 
+			// Get any existing IP for this server so it doesn't change
+			var new_ip = variables.hostaliases.reduce( (new_ip,line)=>{
+				if( line contains server_id ) {
+					var match = line.reFindNoCase( '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', 1, true ).match;
+					if( len( match ) >= 1 ) {
+						new_ip = match[1];
+					}
+				}
+				return new_ip;
+			} , '' );
+
 			// remove all lines that already contain the server id
 			// that way we can make sure that the hosts file doesn't grow indefinitely upon
 			// changing the host name for an existing server
 			removeOldEntriesFromHostsfile( arguments.server_id );
 
-			var new_ip = getNewIP( variables.hostaliases.toList( server.separator.line ) );
+			if( len( new_ip ) ) {
+				variables.consoleLogger.info( "re-using previous hostupdater IP of [#new_ip#]." );
+			} else {
+				new_ip = getNewIP( variables.hostaliases.toList( server.separator.line ) );
+			}
 
 			for( var hostname in arguments.hostnames ) {
 				variables.consoleLogger.info( "Adding host '#hostname#' to your hosts file!" );

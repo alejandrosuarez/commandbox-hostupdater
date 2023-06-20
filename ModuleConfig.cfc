@@ -55,11 +55,11 @@ component accessors=true {
 	}
 
 	// Modern CommandBox behavior starting in 6.0 which takes bindings into account
-	public void function onServerStart( interceptData ) {
+	public void function onBindingsBuild( interceptData ) {
 		// Provide a way to turn this off per-server
 		var enabled = arguments.interceptData.serverDetails.serverJSON.hostUpdaterEnable ?: true;
 
-		if( !enabled || !isModernCommandBox() ) {
+		if( !enabled ) {
 			return;
 		}
 
@@ -74,17 +74,12 @@ component accessors=true {
 		if( !isArray( aliases ))
 			aliases = aliases.listToArray();
 
-		// Also look for bindings in CommandBox 6+
-		if( interceptData.serverInfo.keyExists( 'bindings' ) && isStruct( interceptData.serverInfo.bindings ) ) {
-			// TODO: handle bindings on a specific local IP address that isn't localhost.
-			// The host file entries will only work for bindings to localhost OR all IPs, and may affect the order of binding resolution.
-			interceptData.serverInfo.bindings.each( (name,binding)=>{
-				// ignore wildcard, regex, and default bindings.
-				if( isStruct( binding ) && binding.keyExists( 'host' ) ) {
-					aliases.append( binding.host );
-				}
-			} );
-		}
+		// TODO: handle bindings on a specific local IP address that isn't localhost.
+		// The host file entries will only work for bindings to localhost OR all IPs, and may affect the order of binding resolution.
+		interceptData.bindings.each( (binding)=>{
+			// ignore wildcard, regex, and default bindings.
+			aliases.append( binding.hosts.filter( (a)=>!a.findNoCase('*') && !a.startsWith('~') ), true );
+		} );
 
 		arraySort( aliases, 'text' );
 
